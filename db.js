@@ -110,7 +110,37 @@ async function init() {
       productores_ofreciendo INTEGER NOT NULL,
       volumen_total_qq REAL NOT NULL
     );
+
+    CREATE TABLE zonas_coords (
+      zona TEXT PRIMARY KEY,
+      latitud REAL NOT NULL,
+      longitud REAL NOT NULL
+    );
+
+    CREATE TABLE clima_cache (
+      zona TEXT PRIMARY KEY,
+      datos_json TEXT NOT NULL,
+      actualizado_en TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE reportes_plaga (
+      id INTEGER PRIMARY KEY,
+      usuario_id INTEGER NOT NULL,
+      usuario_nombre TEXT NOT NULL,
+      zona TEXT NOT NULL,
+      tipo_plaga TEXT NOT NULL,
+      descripcion TEXT,
+      confirmaciones INTEGER DEFAULT 1,
+      fecha_hora TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE reportes_plaga_confirmaciones (
+      reporte_id INTEGER NOT NULL,
+      usuario_id INTEGER NOT NULL,
+      PRIMARY KEY (reporte_id, usuario_id)
+    );
   `);
+
 
   // --- Seed data ---
   db.run(`INSERT INTO beneficiadoras (nombre, tipo, zona, telefono, verificado) VALUES
@@ -128,8 +158,6 @@ async function init() {
   `);
 
   db.run(`INSERT INTO alertas (tipo, nivel, titulo, detalle, zona) VALUES
-    ('clima', 'alto', 'Lluvias intensas previstas', 'Se esperan lluvias fuertes en las próximas 48 horas en la zona de Montero. Considere proteger la cosecha almacenada.', 'Montero'),
-    ('plaga', 'medio', 'Alerta de sogata', 'Se ha detectado presencia de sogata en cultivos cercanos a San Pedro. Revise sus parcelas.', 'San Pedro'),
     ('precio', 'info', 'Precio en alza', 'El precio del arroz subió un 4% esta semana en la región.', NULL)
   `);
 
@@ -138,6 +166,14 @@ async function init() {
     ('San Pedro', 28, 2100),
     ('Yapacaní', 19, 1400),
     ('Mineros', 15, 980)
+  `);
+
+  // Coordenadas reales aproximadas de cada zona (Santa Cruz, Bolivia)
+  db.run(`INSERT INTO zonas_coords (zona, latitud, longitud) VALUES
+    ('Montero', -17.3395, -63.2528),
+    ('San Pedro', -17.1667, -63.2833),
+    ('Yapacaní', -17.4167, -63.8500),
+    ('Mineros', -17.1167, -63.2333)
   `);
 
   persist();
