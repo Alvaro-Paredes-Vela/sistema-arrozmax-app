@@ -22,17 +22,18 @@ function sincronizarAlertaDesdeReporte(reporte) {
   );
 
   if (existente) {
-    db.run('UPDATE alertas SET nivel = ?, detalle = ?, fecha_hora = CURRENT_TIMESTAMP WHERE id = ?', [
+    db.run('UPDATE alertas SET nivel = ?, detalle = ?, reporte_id = ?, fecha_hora = CURRENT_TIMESTAMP WHERE id = ?', [
       nivel,
       detalle,
+      reporte.id,
       existente.id,
     ]);
   } else {
     const id = db.nextId('alertas');
     db.run(
-      `INSERT INTO alertas (id, tipo, nivel, titulo, detalle, zona, fecha_hora)
-       VALUES (?, 'plaga', ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-      [id, nivel, titulo, detalle, reporte.zona]
+      `INSERT INTO alertas (id, tipo, nivel, titulo, detalle, zona, reporte_id, fecha_hora)
+       VALUES (?, 'plaga', ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+      [id, nivel, titulo, detalle, reporte.zona, reporte.id]
     );
   }
 }

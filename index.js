@@ -20,16 +20,10 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Health Check
 app.get('/api/health', (req, res) => {
-  res.json({
-    ok: true,
-    servicio: 'ArrozMax API',
-    hora: new Date().toISOString()
-  });
+  res.json({ ok: true, servicio: 'ArrozMax API', hora: new Date().toISOString() });
 });
 
-// Rutas principales
 app.use('/api/auth', authRoutes);
 app.use('/api/precios', preciosRoutes);
 app.use('/api/alertas', alertasRoutes);
@@ -40,39 +34,8 @@ app.use('/api/reportes', reportesRoutes);
 app.use('/api/clima', climaRoutes);
 app.use('/api/reportes-plaga', reportesPlagaRoutes);
 
-/* ============================================================
-   DEBUG
-   SOLO PARA DESARROLLO
-   Eliminar antes de publicar en producción
-============================================================ */
-
-app.get('/api/debug', (req, res) => {
-  try {
-    res.json({
-      usuarios: db.all('SELECT * FROM usuarios'),
-      beneficiadoras: db.all('SELECT * FROM beneficiadoras'),
-      precios: db.all('SELECT * FROM precios'),
-      alertas: db.all('SELECT * FROM alertas'),
-      alertas_umbral: db.all('SELECT * FROM alertas_umbral'),
-      ofertas: db.all('SELECT * FROM ofertas'),
-      zonas_coords: db.all('SELECT * FROM zonas_coords'),
-      clima_cache: db.all('SELECT * FROM clima_cache'),
-      reportes_plaga: db.all('SELECT * FROM reportes_plaga'),
-      reportes_plaga_confirmaciones: db.all('SELECT * FROM reportes_plaga_confirmaciones')
-    });
-  } catch (err) {
-    res.status(500).json({
-      error: err.message
-    });
-  }
-});
-
-/* ========================================================= */
-
 app.use((req, res) => {
-  res.status(404).json({
-    error: 'Ruta no encontrada.'
-  });
+  res.status(404).json({ error: 'Ruta no encontrada.' });
 });
 
 db.init()
@@ -81,10 +44,10 @@ db.init()
       console.log(`✅ ArrozMax API corriendo en http://localhost:${PORT}`);
     });
 
-    // Actualiza el clima al iniciar
+    // Actualiza el clima real al arrancar el servidor...
     actualizarClimaTodasLasZonas();
 
-    // Actualiza cada 3 horas
+    // ...y luego cada 3 horas automáticamente.
     cron.schedule('0 */3 * * *', () => {
       console.log('⏰ Actualizando clima programado...');
       actualizarClimaTodasLasZonas();

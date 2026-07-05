@@ -91,6 +91,7 @@ async function init() {
       titulo TEXT NOT NULL,
       detalle TEXT NOT NULL,
       zona TEXT,
+      reporte_id INTEGER,
       fecha_hora TEXT DEFAULT CURRENT_TIMESTAMP
     );
 
