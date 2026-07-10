@@ -13,6 +13,8 @@ const alertasUmbralRoutes = require('./routes/alertasUmbral');
 const reportesRoutes = require('./routes/reportes');
 const climaRoutes = require('./routes/clima');
 const reportesPlagaRoutes = require('./routes/reportesPlaga');
+const zonasRoutes = require('./routes/zonas');
+const usuariosRoutes = require('./routes/usuarios');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,6 +39,8 @@ app.use('/api/alertas-umbral', alertasUmbralRoutes);
 app.use('/api/reportes', reportesRoutes);
 app.use('/api/clima', climaRoutes);
 app.use('/api/reportes-plaga', reportesPlagaRoutes);
+app.use('/api/zonas', zonasRoutes);
+app.use('/api/usuarios', usuariosRoutes);
 
 /* ==========================================================
    DEBUG - SOLO PARA DESARROLLO

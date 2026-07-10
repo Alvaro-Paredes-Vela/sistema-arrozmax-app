@@ -40,10 +40,20 @@ router.post('/registro', (req, res) => {
     const hash = bcrypt.hashSync(password, 10);
     const id = db.nextId('usuarios');
 
+    let beneficiadoraId = null;
+    if (rol === 'beneficiadora' || rol === 'comercializadora') {
+      beneficiadoraId = db.nextId('beneficiadoras');
+      db.run(
+        `INSERT INTO beneficiadoras (id, nombre, tipo, zona, telefono, verificado)
+         VALUES (?, ?, ?, ?, ?, 0)`,
+        [beneficiadoraId, nombre, rol === 'beneficiadora' ? 'Beneficiadora' : 'Comercializadora', zona || 'Montero', telefono]
+      );
+    }
+
     db.run(
-      `INSERT INTO usuarios (id, nombre, telefono, password_hash, rol, zona, plan)
-       VALUES (?, ?, ?, ?, ?, ?, 'ingenio_pequeno')`,
-      [id, nombre, telefono, hash, rol, zona || null]
+      `INSERT INTO usuarios (id, nombre, telefono, password_hash, rol, zona, beneficiadora_id, plan)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'ingenio_pequeno')`,
+      [id, nombre, telefono, hash, rol, zona || null, beneficiadoraId]
     );
 
     const usuario = db.get('SELECT * FROM usuarios WHERE id = ?', [id]);

@@ -11,10 +11,33 @@ router.get('/', requireAuth, (req, res) => {
 
 router.post('/', requireAuth, (req, res) => {
   try {
-    const { beneficiadora_id, precio_bs } = req.body;
+    let { beneficiadora_id, precio_bs } = req.body;
 
-    if (!beneficiadora_id || !precio_bs) {
+    if (!precio_bs) {
       return res.status(400).json({ error: 'Faltan datos del precio.' });
+    }
+
+    // Compatibilidad con cuentas B2B creadas antes de que el registro
+    // vinculara automáticamente una fila en "beneficiadoras": si el
+    // usuario logueado no trae beneficiadora_id, se la creamos ahora.
+    if (!beneficiadora_id) {
+      const usuarioActual = db.get('SELECT * FROM usuarios WHERE id = ?', [req.usuario.id]);
+      if (!usuarioActual) {
+        return res.status(404).json({ error: 'Usuario no encontrado.' });
+      }
+      if (usuarioActual.beneficiadora_id) {
+        beneficiadora_id = usuarioActual.beneficiadora_id;
+      } else {
+        const nuevaId = db.nextId('beneficiadoras');
+        const tipo = usuarioActual.rol === 'beneficiadora' ? 'Beneficiadora' : 'Comercializadora';
+        db.run(
+          `INSERT INTO beneficiadoras (id, nombre, tipo, zona, telefono, verificado)
+           VALUES (?, ?, ?, ?, ?, 0)`,
+          [nuevaId, usuarioActual.nombre, tipo, usuarioActual.zona || 'Montero', usuarioActual.telefono]
+        );
+        db.run('UPDATE usuarios SET beneficiadora_id = ? WHERE id = ?', [nuevaId, usuarioActual.id]);
+        beneficiadora_id = nuevaId;
+      }
     }
 
     const beneficiadora = db.get('SELECT * FROM beneficiadoras WHERE id = ?', [beneficiadora_id]);
